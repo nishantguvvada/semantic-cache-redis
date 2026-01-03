@@ -13,14 +13,16 @@ llmcache = SemanticCache(
     name="llmcache",
     vectorizer=langcache_embed,
     redis_client=r,
-    distance_threshold=0.1
+    distance_threshold=0.3
 )
 
 if __name__ == "__main__":
 
+    llmcache.clear()
+
     # Data containing IT questions and answers
     df = pd.DataFrame({
-        "Question": [
+        "question": [
             "What is the purpose of a Firewall?",
             "What does DNS stand for and what is its function?",
             "What is the difference between RAM and ROM?",
@@ -32,7 +34,7 @@ if __name__ == "__main__":
             "What is Active Directory?",
             "What is the primary function of a Router?"
         ],
-        "Answer": [
+        "response": [
             "A security system that monitors and controls incoming and outgoing network traffic based on predefined rules.",
             "Domain Name System; it translates human-readable domain names (like google.com) into IP addresses.",
             "RAM is volatile short-term memory for active data, while ROM is non-volatile permanent storage for firmware.",
@@ -52,7 +54,7 @@ if __name__ == "__main__":
             response=df.iloc[i]["response"]
         )
     
-    question = "What does VPN mean?"
+    question = "Talk about VPN"
     if response := llmcache.check(prompt=question):
         print(response)
     else:
