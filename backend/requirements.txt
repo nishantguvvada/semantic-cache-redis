@@ -1,0 +1,4 @@
+redisvl
+redis
+langchain-google-genai
+python-dotenv
