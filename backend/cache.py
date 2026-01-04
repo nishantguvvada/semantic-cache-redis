@@ -16,6 +16,51 @@ llmcache = SemanticCache(
     distance_threshold=0.3
 )
 
+class SemCache:
+
+    def __init__(self, embedding_model: HFTextVectorizer, cache: SemanticCache):
+        self.embedding_model = embedding_model
+        self.cache = cache
+
+    def build_cache(self, df: pd.DataFrame, clear_cache: bool):
+
+        if clear_cache:
+            self.cache.clear()
+
+        for i in range(len(df)):
+            self.cache.store(
+                prompt=df.iloc[i]["question"],
+                response=df.iloc[i]["response"]
+            )
+        
+        print("Cache built.")
+
+    def clear_cache(self):
+
+        self.cache.clear()
+
+        print("Cache cleared.")
+
+    def check_cache(self, question: str):
+
+        if response := self.cache.check(prompt=question):
+            # print(response)
+            # [{
+            #     'entry_id': 'c1a2be958744600f5c5d99d155c75ca1a231eae4b8e089587a26a35c6b30b391', 
+            #     'prompt': 'What is a VPN?', 
+            #     'response': 'A Virtual Private Network creates a secure, encrypted connection over a less secure network like the internet.', 
+            #     'vector_distance': 0.144856154919, 
+            #     'inserted_at': 1767512524.36, 
+            #     'updated_at': 1767512524.36, 
+            #     'key': 'llmcache:c1a2be958744600f5c5d99d155c75ca1a231eae4b8e089587a26a35c6b30b391'
+            # }]
+            return response
+        else:
+            print("Empty cache")
+            return "Empty cache"
+
+cache = SemCache(langcache_embed, llmcache)
+
 if __name__ == "__main__":
 
     llmcache.clear()
