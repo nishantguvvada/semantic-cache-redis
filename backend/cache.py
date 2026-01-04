@@ -59,7 +59,7 @@ class SemCache:
             print("Empty cache")
             return "Empty cache"
 
-cache = SemCache(langcache_embed, llmcache)
+rcache = SemCache(langcache_embed, llmcache)
 
 if __name__ == "__main__":
 
