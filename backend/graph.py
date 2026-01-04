@@ -14,9 +14,9 @@ class WorkflowState(TypedDict):
     response: str
     metadata: Annotated[list[str], add]
 
-def check_cache_node(state: WorkflowState):
+async def check_cache_node(state: WorkflowState):
     print("checking cache")
-    response = rcache.cache.check(prompt=state["original_question"], num_results=1)
+    response = await rcache.cache.acheck(prompt=state["original_question"], num_results=1)
     cache_flag = False
     output = ""
     if len(response) > 0:
@@ -33,7 +33,7 @@ def knowledge_base_node(state: WorkflowState):
     time.sleep(3)
     return { "metadata": [f"knowledge_base_node: {time.perf_counter()}"] }
 
-def synthesize_node(state: WorkflowState):
+async def synthesize_node(state: WorkflowState):
     print("synthesizing output")
     query_input = ""
 
@@ -41,7 +41,7 @@ def synthesize_node(state: WorkflowState):
         response = state["cached_response"]
     else:
         query_input = f"Based on the user question: {state["original_question"]}\n\n generate a conversational response."
-        response = llm.invoke(query_input)
+        response = await llm.ainvoke(query_input)
     
     return { "response": response, "metadata": [f"synthesize_node: {time.perf_counter()}"] }
 
@@ -64,5 +64,6 @@ graph.add_conditional_edges("check_cache_node", route, { "knowledge_base_node": 
 
 compiled_graph = graph.compile()
 
-output = compiled_graph.invoke({"original_question":"Talk about VPN"})
-print(output)
+if __name__ == "__main__":
+    output = compiled_graph.invoke({"original_question":"Talk about VPN"})
+    print(output)

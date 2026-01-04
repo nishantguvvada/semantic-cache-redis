@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+from graph import compiled_graph
 import logging
 import uvicorn
 import time
@@ -37,6 +39,20 @@ def default():
     time.sleep(3)
     logger.info(f"Processing time: {start - time.perf_counter()}")
     return { "response": "working" }
+
+class InputQuery(BaseModel):
+    query: str
+
+@app.post('/ask')
+async def invoke(input_query: InputQuery):
+
+    response = await compiled_graph.ainvoke({ "original_question": input_query.query })
+    if response["cache_hit"]:
+        output = response["cached_response"]
+    else:
+        output = response["response"].content
+        
+    return { "response": output }
 
 if __name__ == "__main__":
     uvicorn.run(app=app, host="0.0.0.0", port=3000)
